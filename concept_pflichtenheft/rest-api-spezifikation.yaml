@@ -1,0 +1,278 @@
+# put this into http://editor.swagger.io/ to generate API description
+swagger: '2.0'
+info:
+  title: API
+  description: REST API for uploading, executing, deleting, changing and naming Lambdas.
+  version: "1.0.0"
+host: server.less
+schemes:
+  - http
+produces:
+  - application/json
+paths:
+  /lambdas:
+    post:
+      summary: Upload Lambda Function.
+      description: Uploads a Lambda function and config as JSON. If successful (200), it returns a master token for accessing, executing, deleting, changing the Lambda Function and which can be used to generate child tokens with specific needs to give execution authorization to third party. Also a link to the executable lambda function is described. 
+        If not successful because of an error parsing the JSON body, 422 will be returned with a specific error message.
+        If not successful because a lambda function already exists, 500 will be returned with a description of options how to resolve the problem.
+        Else the default error handling returns a triple (errorcode, message, fields).
+      parameters:
+        - name: config
+          in: body
+          required: true
+          schema:
+            type: string
+            format: json
+      responses:
+        201: 
+          description: Successful, return Token and Link.
+          schema:
+                  type: object
+                  properties:
+                    token:
+                      type: string
+                    link:
+                      type: string
+        500:
+          description: Lambda Function under this name exists.
+          schema:
+                 type: string
+                 description: how to solve
+        422:
+          description: Error with JSON body.
+          schema:
+                 type: string
+                 description: specific error message
+        default: 
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /lambdas/{name}:
+    put:
+      summary: Update Lambda Function.
+      description: Updates a Lambda function or config with a JSON file. If successful, it returns 200. 
+        If not successful because of a wrong or no authentification token, 401 will be returned with a description of options how to resolve the problem.
+        If not successful because of a missing lambda function, 404 will be returned with a description of options how to resolve the problem.
+        If not successful because of an error parsing the JSON body, 422 will be returned with a specific error message.
+        Else the default error handling returns a triple (errorcode, message, fields).
+      parameters:
+        - name: token
+          in: header
+          required: true
+          type: string
+          format: token
+        - name: config
+          in: body
+          required: true
+          schema:
+            type: string
+            format: json
+      responses:
+        200: 
+          description: Successful.
+        404:
+          description: Not found.
+          schema:
+                 type: string
+                 description: how to solve
+        422:
+          description: Error with JSON body.
+          schema:
+                 type: string
+                 description: specific error message
+        401:
+          description: Authentication failed.
+          schema:
+                 type: string
+                 description: how to solve
+        default: 
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/Error'
+    get:
+      summary: Show configuration of Lambda function.
+      description: Shows configuration (JSON uploaded on creation or update) of Lambda function. Returns configuration as JSON if successful (200).
+        If not successful because of a wrong or no authentification token, 401 will be returned with a description of options how to resolve the problem.
+        If not successful because of a missing lambda function, 404 will be returned with a description of options how to resolve the problem.
+        Else the default error handling returns a triple (errorcode, message, fields).
+      parameters:
+        - name: token
+          in: header
+          required: true
+          type: string
+          format: token
+      responses:
+        200:
+          description: Configuration of the Lambda Function
+          schema:
+              type: string
+              format: json
+              description: current config
+        404:
+          description: Not found.
+          schema:
+              type: string
+              description: how to solve
+        401:
+          description: Authentication failed.
+          schema:
+                 type: string
+                 description: how to solve
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete Lambda Function
+      description: Deletes Lambda Function, returns 204 if successful.
+        If not successful because of a wrong or no authentification token, 401 will be returned with a description of options how to resolve the problem.
+        If not successful because of a missing lambda function, 404 will be returned with a description of options how to resolve the problem.
+        Else the default error handling returns a triple (errorcode, message, fields).
+      parameters:
+        - name: token
+          in: header
+          required: true
+          type: string
+          format: token
+      responses:
+        204:
+          description: Deletion successful. No content.
+        404:
+          description: Not found.
+          schema:
+              type: string
+              description: how to solve
+        401:
+          description: Authentication failed.
+          schema:
+                 type: string
+                 description: how to solve
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    parameters:
+        - name: name
+          in: path
+          required: true
+          type: string
+          format: string
+          
+  /lambdas/{name}/execute:
+    post:
+      summary: Execute Lambda Function
+      description: Executes Lambda Function with a specific configuration in JSON, returns result if successful (200).
+        If not successful because of a wrong or no authentification token, 401 will be returned with a description of options how to resolve the problem.
+        If not successful because of a missing lambda function, 404 will be returned with a description of options how to resolve the problem.
+        If not successful because of an error parsing the JSON body, 422 will be returned with a specific error message.
+        Else the default error handling returns a triple (errorcode, message, fields).
+      parameters:
+        - name: token
+          in: header
+          required: true
+          type: string
+          format: token
+        - name: config
+          in: body
+          required: true
+          schema:
+            type: string
+            format: json
+      responses:
+        200:
+          description: Results of the Lambda Function
+          schema:
+              type: object
+              description: results
+        404:
+          description: Not found.
+          schema:
+              type: string
+              description: how to solve
+        401:
+          description: Authentication failed.
+          schema:
+                 type: string
+                 description: how to solve
+        422:
+          description: Error with JSON body.
+          schema:
+                 type: string
+                 description: specific error message
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    parameters:
+        - name: name
+          in: path
+          required: true
+          type: string
+          format: string
+          
+  /lambdas/{name}/token:
+    get:
+      summary: Generates a child-token to execute Lambda Function for third parties
+      description: Generates a child-token to execute Lambda Function for third parties, returns token if successful (200).
+        If no parameters are specified in JSON, a token is generated with no time or execution limit.
+        If not successful because of a wrong or no authentification token, 401 will be returned with a description of options how to resolve the problem.
+        If not successful because of a missing lambda function, 404 will be returned with a description of options how to resolve the problem.
+        If not successful because of an error parsing the queue in JSON, 422 will be returned with a specific error message.
+        Else the default error handling returns a triple (errorcode, message, fields).
+      parameters:
+        - name: token
+          in: header
+          required: true
+          type: string
+          format: token
+        - name: parameters
+          in: query
+          required: false
+          type: string
+          format: json
+      responses:
+        200:
+          description: Successful, returns Child Token.
+          schema:
+              type: string
+              format: token
+              description: child token
+        401:
+          description: Authentication failed.
+          schema:
+                 type: string
+                 description: how to solve
+        404:
+          description: Not found.
+          schema:
+              type: string
+              description: how to solve
+        422:
+          description: Error with JSON.
+          schema:
+                 type: string
+                 description: specific error message
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    parameters:
+        - name: name
+          in: path
+          required: true
+          type: string
+          format: string
+
+definitions:
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
