@@ -1,0 +1,191 @@
+\documentclass[a4paper,20pt,oneside]{book}
+\usepackage[utf8]{inputenc} 
+\usepackage[T1]{fontenc} 
+\usepackage[nonumberlist]{glossaries} 
+\usepackage[english,ngerman]{babel}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{titlesec}
+\usepackage{pdfpages}
+\usepackage{glossaries}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{titlepic}
+\usepackage{booktabs}
+\usepackage{ulem}
+\usepackage[document]{ragged2e}
+\usepackage[DIV=14,BCOR=2mm,headinclude=true,footinclude=false]{typearea}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\lstset{frame=tb,
+	language=bash,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3
+}
+
+\titleformat{\subparagraph}
+{\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
+\titlespacing*{\subparagraph}{\parindent}{3.25ex plus 1ex minus .2ex}{.75ex plus .1ex}
+\makeglossaries
+
+
+
+\begin{document}
+	\title{\Huge{\bfseries{Qualitätssicherung}}}
+	\author{}
+	\maketitle
+	\clearpage
+	
+	\tableofcontents
+	
+	\chapter{Einleitung}
+	In diesem Dokument wird die Qualitätssicherungsphase des Projekts Serverless Server for Industry 4.0 dokumentiert. Im folgenden werden die ausgeführten Tests vorgestellt, sowie die Testabdeckung und Vergleich mit dem geplanten Testablauf aus dem Pflichtenheft. Anschließend werden die entdeckten Fehler dokumentiert.
+
+	
+	
+	\chapter{Informationen über Tests}
+	\section{Unit-Tests}
+		
+	\begin{table}[h!]
+		\resizebox{0.7\textwidth}{!}{
+			\begin{tabular}{|l|c|}
+				\hline 
+				\textbf{Datei} & \textbf{Anzahl} \\ \hline \hline
+				RestApiControllerTest & 9 \\ \hline 
+				AuthFacadeImplTest & 3 \\ \hline 
+				AuthTest & 6 \\ \hline 
+				ContentValidatorTest & 2 \\ \hline 
+				SubtokenCreaterTest & 1 \\ \hline 
+				TokenCreatorTest & 5 \\ \hline 
+				RequestServerConverterTest & 7 \\ \hline 
+				RuntimeTestNegative & 12 \\ \hline 
+				RuntimeTestPositive & 8 \\ \hline 
+				LambdaManagerFacadeImplTest & 7 \\ \hline 
+				\textbf{Gesamt} & \textbf{60} \\ \hline
+		\end{tabular}}	
+	\end{table}
+
+
+     \clearpage
+	
+	\section{Integrations-Tests}
+	
+	\begin{table}[h!]
+		\resizebox{0.7\textwidth}{!}{
+			\begin{tabular}{|l|c|}
+				\hline
+				\textbf{Datei} & \textbf{Anzahl} \\ \hline \hline 
+				testAuthNegative401 & 6 \\ \hline 
+				testAuthPositive & 7 \\ \hline 
+				testDeleteLambdaPositive & 2 \\ \hline 
+				testDeleteLambdaNegative & 1 \\ \hline 
+				testExecuteLambdaPositive & 8 \\ \hline
+				testExectueLambdaNegative & 2 \\ \hline
+				testGetLambdaPositive & 1 \\ \hline 
+				testGetLambdaNegative & 1 \\ \hline 
+				testUpdateLambdaPositive & 13 \\ \hline 
+				testUpdateLambdaNegative & 4 \\ \hline 
+				testUploadLambdaPositive & 2 \\ \hline 
+				testUploadLambdaNegative & 13 \\ \hline
+				\textbf{Gesamt} & \textbf{58} \\ \hline
+		\end{tabular}}	
+	\end{table}
+	
+
+	
+	\chapter{Coverage}
+	\begin{table}[h!]
+		\resizebox{0.7\textwidth}{!}{
+			\begin{tabular}{|l|c|}
+				\hline 
+				\textbf{Modul} & \textbf{Coverage} \\ \hline \hline
+				apicontroller & 54\% \\ \hline
+				auth & 89\% \\ \hline
+				model.converter & 80\% \\ \hline
+				model.exception & 66\% \\ \hline
+				model.lambda & 73\% \\ \hline
+				model.messages & 79\% \\ \hline
+				model.servicelayer.lambdaruntime & 93\% \\ \hline
+				model.servicelayer.service & 35\% \\ \hline
+				\hline
+				\textbf{Gesamt} & \textbf{74\%} \\ \hline
+		\end{tabular}}	
+	\end{table}
+	
+	Ungetestet blieben einige Getter- und Setter-Methoden sowie Konstruktoren. Dies betrifft vor allem die Module lambda und messages.  Einige Codezeilen konnten durch automatische Tests nicht abgedeckt werden (zum Beispiel Verbindungsfehler zur Runtime-Umgebung). Diese Fälle wurden aber ausreichend manuell getestet. Auch gibt es nicht getestete ungenutzte Methoden, die für zukünftige Erweiterungen nicht gelöscht wurden.
+	
+	
+	\chapter{Testfälle}
+	\begin{longtable}{lp{10cm}p{3cm}}
+		\hline \\
+		\textbf{Nr.} & \textbf{Beschreibung} & \textbf{Erfüllt} \\ \hline\hline \\ 
+		/T010/ & Lambda-Entwickler lädt eine Lambda-Funktion hoch und bekommt ein Zugriffs-Token zurück. & JA   \\ \hline \\
+		/T020/ & Lambda-Entwickler stellt die Ausführungsumgebung für die Lambda-Funktion bereit. & JA\\ \hline \\
+		/T030/ & Lambda-Entwickler gibt Token aus für Lambda-Verwender. & JA\\ \hline \\
+		/T040/ & Lambda-Entwickler authentifiziert sich. & JA\\ \hline \\
+		/T050/ & Lambda-Entwickler löscht seine Lambda-Funktion. & JA \\ \hline \\
+		/T051/ & Lambda-Entwickler ändert seine Lambda-Funktion. & JA \\ \hline \\
+		/T052/ & Lambda-Entwickler benennt seine Lambda-Funktion. & JA\\ \hline \\
+		/T053/ & Lambda-Entwickler konfiguriert seine Lambda-Funktion. & JA\\ \hline \\
+		/T054/ & Lambda-Entwickler bindet Daten für seine Lambda-Funktion ein. & JA \\ \hline \\
+		/T060/ & Lambda-Verwender führt eine Lambda-Funktion mit einem Token aus. & JA\\ \hline \\
+		/T061/ & Lambda-Verwender gibt an, wie viel mal die Lambda-Funktion ausgeführt werden muss. & JA\\ \hline \\
+		/T070/ & Gleichzeitiger Zugriff auf eine hochgeladene Lambda-Funktion von mehreren Rechnern aus. & JA (manuell getestet)\\ \hline \\
+		/T080/ & Terminierung von einer Lambda-Funktion. & JA\\ \hline \\
+		/T090/ & Eine Lambda-Funktion, die länger läuft als vom Server angegeben, wird terminiert. & JA\\ \hline 
+		/UT010/ & Lambda-Verwender ruft eine nicht-existierende Lambda-Funktion auf. & JA\\ \hline \\
+		/UT020/ & Lambda-Verwender ruft eine Lambda-Funktion mit einem falschen Token aus. & JA\\ \hline \\
+		/UT030/ & Lambda-Entwickler gibt einen zu langen Zeitintervall für Funktionsausführung an. & Nicht implementiert \\  \hline 
+		/WT070/ & Lambda-Entwickler kauft die Token für seine Lambda-Funktion. &? (nur wenn bitcoins implementiert)\\ \hline 
+		\hline
+		\\\\
+	\end{longtable}
+	
+	\chapter{Gefundene und behobene Fehler}
+	\section{Probleme mit Parameterübergabe beim Starten einer Instanz}
+	\subsection{Symptom}
+	Parameter wurden beim Start einer Lambda-Instanz nicht übergeben.
+	\subsection{Fehler}
+	Falsches Befehlsformat der Datei zur Imageerzeugung (Dockerfile)
+	\subsection{Behebung}
+	Nun wird das korrekte Befehlsformat verwendet.
+	
+	\section{Nicht-Berücksichtigung der Anzahl Ausführungen}
+	\subsection{Symptom}
+	Der Parameter "times" bei Execute-Anfragen wurde ignoriert. Die Funktion wurde immer genau einmal ausgeführt.
+	\subsection{Fehler}
+	Der Parameter wurde im Modul Runtime nicht berücksichtigt.
+	\subsection{Behebung}
+	Der Parameter wird nun von der Runtime unterstützt und das Lambda die korrekte Anzahl oft ausgeführt.
+	\section{Falsche Erkennung des Tokens}
+	\subsection{Symptom}
+	Gültige Tokens wurden nicht als solche erkannt, und als Folge haben alle Methoden nicht funktioniert, die ein Token als Parameter entgegengenommen haben.
+	\subsection{Fehler}
+	In dem TokenCreator war der secret key falsch kodiert, und die Methode parseToken hat eine Invalid Signature Exception geworfen.
+	\subsection{Behebung}
+	Der secret key wird vor der Verwendung als UTF-8 dekodiert (secret.getBytes("UTF-8")).
+	\section{Fehlende Fehlermeldungen}
+	\subsection{Symptom}
+	Es wurden die Namen der Fehlerklassen statt einer Fehlermeldung bei falschen Eingaben an den Benutzer gesendet.
+	\subsection{Fehler}
+	Fehlermeldungen zu den betreffenden Fehlerklassen waren im System nicht vorhanden oder nicht mit den Fehlerklassen verbunden.
+	\subsection{Behebung}
+	Entsprechende Fehlermeldungen für die auftreten Fehler wurden hinzugefügt. Der Benutzer des Systems erhält nun bei falschen Eingaben korrekte Fehlermeldungen.
+	
+	\chapter{Zusammenfassung}
+	Alle  Testfälle  und  Szenarios für die implementierten Funktionalitäten konnten erfolgreich durchgeführt werden. Modultests wurden mithilfe von JUnit und Mockito Framework durchgeführt, die Integrations- und Belastungstests wurden in Python geschrieben und teilweise manuell ausgeführt. Dabei konnten aufgetretene Fehler erfolgreich behoben werden. Die bei der Qualitätssicherung erreichte Testabdeckung weist auf ein robustes und stabiles Programmverhältnis hin. Dementsprechend kann die Qualitätssicherungsphase erfolgreich abgeschlossen werden.
+	\printglossaries
+\end{document}
